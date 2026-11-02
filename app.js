@@ -192,7 +192,13 @@
 
   // ---------- mapa 3D de Tierra Santa ----------
   const lienzo = $('#mapa');
-  let renderer, scene, camera, BL, glow, camModo = 'reposo', t0 = performance.now();
+  let renderer, scene, camera, BL, glow, camModo = 'reposo', t0 = performance.now(), lugarActual = 'belen';
+  const LUGARES = {};
+  function cambiaLugar(n) {
+    if (!renderer || !LUGARES[n]) return;
+    for (const k in LUGARES) LUGARES[k].mesh.visible = (k === n);
+    lugarActual = n; BL = LUGARES[n].objetivo; glow.position.copy(BL).add(new THREE.Vector3(0, .08, 0));
+  }
   const sobreVolando = $('#sobre-volando');
   let vuelo = null;
   const lerp = (a, b, u) => a + (b - a) * u, clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
@@ -205,26 +211,37 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75)); renderer.setClearColor(0x000000, 0);
     scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x0a0d18, 16, 42);
     camera = new THREE.PerspectiveCamera(50, 1, 0.05, 200);
-    const { w: GW, h: GH, d: GD } = window.HGT, K = 0.00042;
-    const geo = new THREE.BufferGeometry(), pos = new Float32Array(GW * GH * 3), uv = new Float32Array(GW * GH * 2);
-    for (let i = 0; i < GH; i++) for (let j = 0; j < GW; j++) {
-      const k = i * GW + j; pos[k * 3] = j / (GW - 1) * 18 - 9; pos[k * 3 + 1] = GD[k] * K; pos[k * 3 + 2] = i / (GH - 1) * 24 - 12;
-      uv[k * 2] = j / (GW - 1); uv[k * 2 + 1] = 1 - i / (GH - 1);
-    }
-    const idx = []; for (let i = 0; i < GH - 1; i++) for (let j = 0; j < GW - 1; j++) { const a = i * GW + j, b = a + 1, c = a + GW, d = c + 1; idx.push(a, c, b, b, c, d); }
-    geo.setIndex(idx); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.computeVertexNormals();
-    const tex = new THREE.TextureLoader().load('assets/terreno.jpg', () => { window.__mapaListo = true; }); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-    scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: tex })));
     const sol = new THREE.DirectionalLight(0xffe2b0, 0.9); sol.position.set(-8, 10, -6); scene.add(sol);
     scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x6a5434, 1.5));
-    const hAt = (lon, lat) => GD[Math.round((33.4 - lat) / 2.4 * (GH - 1)) * GW + Math.round((lon - 34.2) / 1.8 * (GW - 1))];
-    BL = new THREE.Vector3((35.20 - 34.2) / 1.8 * 18 - 9, hAt(35.20, 31.70) * K, (33.4 - 31.70) / 2.4 * 24 - 12);
+    function terreno(H, url, lon0, dlon, latTop, dlat, lonT, latT, K, avisa) {
+      const { w: GW, h: GH, d: GD } = H;
+      const geo = new THREE.BufferGeometry(), pos = new Float32Array(GW * GH * 3), uv = new Float32Array(GW * GH * 2);
+      for (let i = 0; i < GH; i++) for (let j = 0; j < GW; j++) {
+        const k = i * GW + j; pos[k * 3] = j / (GW - 1) * 18 - 9; pos[k * 3 + 1] = GD[k] * K; pos[k * 3 + 2] = i / (GH - 1) * 24 - 12;
+        uv[k * 2] = j / (GW - 1); uv[k * 2 + 1] = 1 - i / (GH - 1);
+      }
+      const idx = []; for (let i = 0; i < GH - 1; i++) for (let j = 0; j < GW - 1; j++) { const a = i * GW + j, b = a + 1, c = a + GW, d = c + 1; idx.push(a, c, b, b, c, d); }
+      geo.setIndex(idx); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.computeVertexNormals();
+      const tex = new THREE.TextureLoader().load(url, avisa); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+      const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: tex })); scene.add(mesh);
+      const jj = Math.round((lonT - lon0) / dlon * (GW - 1)), ii = Math.round((latTop - latT) / dlat * (GH - 1));
+      const objetivo = new THREE.Vector3(jj / (GW - 1) * 18 - 9, Math.max(0, GD[ii * GW + jj]) * K, ii / (GH - 1) * 24 - 12);
+      return { mesh, objetivo };
+    }
+    LUGARES.belen = terreno(window.HGT, 'assets/terreno.jpg', 34.2, 1.8, 33.4, 2.4, 35.20, 31.70, 0.00042, () => { window.__mapaListo = true; });
+    LUGARES.belen.lado = -1;
+    if (window.HGT_MAD) {
+      LUGARES.madrid = terreno(window.HGT_MAD, 'assets/terreno-madrid.jpg', -4.55, 1.6, 41.48, 1.93, -3.744, 40.381, 0.00042, () => { window.__madridListo = true; });
+      LUGARES.madrid.lado = 1; LUGARES.madrid.mesh.visible = false;
+    }
+    BL = LUGARES.belen.objetivo;
     const gc = document.createElement('canvas'); gc.width = gc.height = 128; const g = gc.getContext('2d');
     const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
     gr.addColorStop(0, 'rgba(255,250,225,1)'); gr.addColorStop(.15, 'rgba(255,220,140,.9)'); gr.addColorStop(.45, 'rgba(255,180,80,.3)'); gr.addColorStop(1, 'rgba(255,170,60,0)');
     g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
     glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, fog: false }));
     glow.position.copy(BL).add(new THREE.Vector3(0, .08, 0)); scene.add(glow);
+    lugarActual = 'belen';
     redimensiona(); addEventListener('resize', redimensiona);
     return true;
   }
@@ -240,8 +257,9 @@
     camera.lookAt(mira || new THREE.Vector3(BL.x, BL.y, BL.z + 0.4));
   }
   // trayectoria de la carta: del Mediterráneo a Belén
-  const P0 = new THREE.Vector3(-8.5, 2.6, 1.5), P1 = new THREE.Vector3(-3.5, 4.2, 6.5);
   function puntoVuelo(u) {
+    const L = (LUGARES[lugarActual] || { lado: -1 }).lado;
+    const P0 = BL.clone().add(new THREE.Vector3(L * 9.5, 2.3, -3.5)), P1 = BL.clone().add(new THREE.Vector3(L * 4.5, 3.9, 1.5));
     const P2 = new THREE.Vector3(BL.x, BL.y + 0.12, BL.z);
     const a = P0.clone().lerp(P1, u), b = P1.clone().lerp(P2, u); return a.lerp(b, u);
   }
@@ -254,11 +272,12 @@
       el.classList.add('visible');
     });
   }
-  function vuela() {
+  function vuela(el, dur) {
+    el = el || sobreVolando;
     return new Promise((res) => {
       if (!renderer) { setTimeout(res, 2500); return; }
-      vuelo = { inicio: performance.now(), dur: 6500, fin: res, el: sobreVolando }; camModo = 'vuelo';
-      sobreVolando.classList.add('visible');
+      vuelo = { inicio: performance.now(), dur: dur || 6500, fin: res, el }; camModo = 'vuelo';
+      el.classList.add('visible');
     });
   }
 
@@ -282,14 +301,16 @@
     if (renderer) {
       if (camModo === 'vuelo' && vuelo) {
         const u = clamp((now - vuelo.inicio) / vuelo.dur), e0 = suave(u), e = vuelo.inverso ? 1 - e0 : e0;
-        colocaCamara(lerp(15, 10, e), lerp(46, 36, e), lerp(-48, -10, e), new THREE.Vector3(lerp(-3, BL.x, e), BL.y, lerp(3, BL.z + .4, e)));
+        const L = (LUGARES[lugarActual] || { lado: -1 }).lado;
+        colocaCamara(lerp(15, 10, e), lerp(46, 36, e), L * lerp(48, 10, e), new THREE.Vector3(BL.x + L * lerp(4, 0, e), BL.y, BL.z + lerp(-2, .4, e)));
         const p = puntoVuelo(e).project(camera);
         const x = (p.x * .5 + .5) * innerWidth, y = (-p.y * .5 + .5) * innerHeight, s = lerp(1.1, .45, e);
         vuelo.el.style.transform = `translate(${x}px,${y}px) rotate(${lerp(-14, 4, e) + Math.sin(t * 3) * 3}deg) scale(${s})`;
         glow.scale.setScalar(vuelo.inverso ? lerp(1.8, 1.0, clamp(u / .3)) : lerp(.6, 1.6, clamp((u - .8) / .2)));
         if (u >= 1) { vuelo.el.classList.remove('visible'); const f = vuelo.fin; vuelo = null; camModo = 'llegada'; f(); }
       } else {
-        const az = reduce ? -6 : -10 + Math.sin(t * .06) * 14;
+        const L = (LUGARES[lugarActual] || { lado: -1 }).lado;
+        const az = reduce ? L * 6 : L * 10 + Math.sin(t * .06) * 14;
         colocaCamara(11.5 + Math.sin(t * .05) * .8, 38, az);
         glow.scale.setScalar(1.1 * (1 + .15 * Math.sin(t * 3.2)));
       }
@@ -303,66 +324,31 @@
   polvo.width = innerWidth; polvo.height = innerHeight;
   iniciaMapa();
   requestAnimationFrame(bucle);
-  // ---------- viaje Belén → Madrid (primer envío, de la parroquia) ----------
+  // ---------- viaje Belén → Madrid, todo en 3D (primer envío, de la parroquia) ----------
   let saltado = false;
-  function construyeRuta() {
-    const M = window.MED, [bx, by] = M.belen, [mx, my] = M.madrid;
-    const cx = (bx + mx) / 2, cy = Math.min(by, my) - 150;
-    const NS = 'http://www.w3.org/2000/svg';
-    $('#ruta-lienzo').innerHTML = `<svg xmlns="${NS}" width="${M.w}" height="${M.h}" viewBox="0 0 ${M.w} ${M.h}">
-      <defs><radialGradient id="halo"><stop offset="0" stop-color="#fff3cf" stop-opacity="1"/><stop offset=".3" stop-color="#ffd27a" stop-opacity=".7"/><stop offset="1" stop-color="#ffb84d" stop-opacity="0"/></radialGradient></defs>
-      <path class="mar-tierra" d="${M.d}"/>
-      <text class="ruta-mar" x="${(bx + mx) / 2 + 40}" y="${(by + my) / 2 + 70}" text-anchor="middle">MAR MEDITERRÁNEO</text>
-      <path id="ruta-camino" class="ruta-linea" d="M${bx} ${by} Q${cx} ${cy} ${mx} ${my}"/>
-      <circle class="ruta-halo" id="halo-belen" cx="${bx}" cy="${by}" r="40"/><circle class="ruta-punto" cx="${bx}" cy="${by}" r="6"/>
-      <text class="ruta-nombre" x="${bx - 12}" y="${by + 30}" text-anchor="end">BELÉN</text>
-      <circle class="ruta-halo" id="halo-madrid" cx="${mx}" cy="${my}" r="46" opacity="0"/><circle class="ruta-punto" cx="${mx}" cy="${my}" r="6"/>
-      <text class="ruta-nombre" x="${mx + 14}" y="${my - 14}">MADRID</text>
-      <text class="ruta-sub" id="ruta-sc" x="${mx + 14}" y="${my + 8}" opacity="0">Parroquia de Santa Casilda</text>
-    </svg>`;
-    return { bx, by, cx, cy, mx, my, M };
-  }
-  function viajaRuta() {
-    return new Promise((res) => {
-      const g = construyeRuta(), lienzo = $('#ruta-lienzo'), env = $('#sobre-ruta'), cam = $('#ruta-camino');
-      const largo = cam.getTotalLength(); cam.style.strokeDasharray = '2 7'; 
-      const clip = cam.cloneNode(); clip.removeAttribute('id'); clip.setAttribute('class', ''); clip.style.cssText = `fill:none;stroke:#fff;stroke-width:4;stroke-dasharray:${largo};stroke-dashoffset:${largo}`;
-      const mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask'); mask.id = 'm-ruta'; mask.appendChild(clip);
-      lienzo.querySelector('defs').appendChild(mask); cam.setAttribute('mask', 'url(#m-ruta)');
-      const ini = performance.now(), dur = 7500; env.style.opacity = 1;
-      function paso(now) {
-        if (saltado) { res(); return; }
-        const W = innerWidth, H = innerHeight, esc = Math.min(H * 0.46 / g.M.h, Math.max(W / g.M.w, H * 0.46 / g.M.h));
-        const u = clamp((now - ini) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
-        const pt = cam.getPointAtLength(largo * e);
-        const zoom = esc * (1 + 0.18 * Math.sin(Math.PI * e));
-        let ox = W / 2 - pt.x * zoom, oy = H * 0.42 - pt.y * zoom;
-        ox = Math.min(0, Math.max(W - g.M.w * zoom, ox));
-        lienzo.style.transform = `translate(${ox}px,${oy}px) scale(${zoom})`;
-        clip.style.strokeDashoffset = largo * (1 - e);
-        const nx = cam.getPointAtLength(Math.min(largo, largo * e + 2));
-        const ang = Math.atan2(nx.y - pt.y, nx.x - pt.x) * 180 / Math.PI + 180;
-        const fin = clamp((u - .88) / .12); env.style.opacity = 1 - fin;
-        env.style.transform = `translate(${ox + pt.x * zoom}px,${oy + pt.y * zoom - 26 * (1 - fin)}px) rotate(${(ang * .25 + Math.sin(now / 300) * 3) * (1 - fin)}deg) scale(${(.75 - .2 * Math.abs(e - .5)) * (1 - .6 * fin)})`;
-        $('#halo-belen').setAttribute('opacity', 1 - e);
-        const lleg = clamp((u - .9) / .1); $('#halo-madrid').setAttribute('opacity', lleg); $('#ruta-sc').setAttribute('opacity', lleg);
-        if (u < 1) requestAnimationFrame(paso); else res();
-      }
-      requestAnimationFrame(paso);
-    });
-  }
+  const esperaO = (p) => Promise.race([p, new Promise((r) => { const iv = setInterval(() => { if (saltado) { clearInterval(iv); r(); } }, 100); })]);
   async function viajeInicial() {
     const bS = $('#saltar'); bS.hidden = false; bS.onclick = () => { saltado = true; };
+    const txtA = $('#sale-ante'), txt = $('#sale-txt');
     ir('s-sale');
     const t0m = performance.now(); while (!window.__mapaListo && performance.now() - t0m < 5000 && !saltado) await espera(100);
-    await Promise.race([sale(), new Promise((r) => { const iv = setInterval(() => { if (saltado) { clearInterval(iv); r(); } }, 100); })]);
-    if (!saltado) { ir('s-ruta'); await viajaRuta(); }
-    if (!saltado) {
-      $('#ruta-ante').textContent = 'MADRID · CARABANCHEL'; $('#ruta-txt').innerHTML = 'Ha llegado a la<br><em>Parroquia de Santa Casilda</em>';
-      await espera(2600);
-    }
+    if (!saltado) await esperaO(espera(1200));
+    if (!saltado) await esperaO(sale());
     if (vuelo) { vuelo.el.classList.remove('visible'); vuelo = null; }
-    bS.hidden = true; camModo = 'reposo';
+    // el salto: destello y cambio a Madrid
+    const fl = $('#destello');
+    if (!saltado) { fl.classList.add('on'); await espera(650); }
+    cambiaLugar('madrid'); camModo = 'reposo';
+    txtA.textContent = 'MADRID · NOCHEBUENA'; txt.innerHTML = '…y viaja hasta<br><em>Madrid</em>';
+    fl.classList.remove('on');
+    if (!saltado) { await esperaO(espera(700)); await esperaO(vuela($('#sobre-sale'), 5600)); }
+    if (vuelo) { vuelo.el.classList.remove('visible'); vuelo = null; }
+    camModo = 'reposo';
+    if (!saltado) {
+      txtA.textContent = 'CARABANCHEL'; txt.innerHTML = 'Ha llegado a la<br><em>Parroquia de Santa Casilda</em>';
+      await esperaO(espera(2800));
+    }
+    bS.hidden = true;
     ir('s-llega');
   }
 

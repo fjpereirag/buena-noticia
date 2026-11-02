@@ -16,12 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=5">
+<link rel="stylesheet" href="estilo.css?v=6">
 </head>
 <body>
 <canvas id="mapa" aria-hidden="true"></canvas>
 <canvas id="polvo" aria-hidden="true"></canvas>
 <div id="velo"></div>
+<div id="destello" aria-hidden="true"></div>
 
 <header class="cabecera">
   <span class="cab-a">PARROQUIA DE SANTA CASILDA</span>
@@ -111,21 +112,11 @@
   <section id="s-sale" class="pantalla transparente">
     <div class="sobre-volando" id="sobre-sale" aria-hidden="true"><div class="sobre-icono"></div></div>
     <div class="bloque abajo">
-      <p class="antetitulo">BELÉN · NOCHEBUENA</p>
-      <h2>De Belén sale<br><em>una buena noticia</em>…</h2>
+      <p class="antetitulo" id="sale-ante">BELÉN · NOCHEBUENA</p>
+      <h2 id="sale-txt">De Belén sale<br><em>una buena noticia</em>…</h2>
     </div>
   </section>
 
-  <section id="s-ruta" class="pantalla transparente">
-    <div id="ruta" aria-hidden="true">
-      <div id="ruta-lienzo"></div>
-      <div class="sobre-volando visible" id="sobre-ruta"><div class="sobre-icono"></div></div>
-    </div>
-    <div class="bloque abajo">
-      <p class="antetitulo" id="ruta-ante">EN CAMINO</p>
-      <h2 id="ruta-txt">…y viaja hasta Madrid</h2>
-    </div>
-  </section>
 
   <button id="saltar" class="saltar" hidden>Saltar</button>
 
@@ -186,8 +177,8 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/three.min.js"></script>
-<script src="assets/altura.js?v=5"></script>
-<script src="assets/mediterraneo.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="assets/altura.js?v=6"></script>
+<script src="assets/altura-madrid.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

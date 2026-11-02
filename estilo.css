@@ -175,3 +175,8 @@ h1 em,h2 em{font-style:italic;color:var(--oro)}
 .parrafo.fuerte{font-weight:700}
 .parrafo.destacado{font-style:italic;font-weight:600;color:var(--rojo);font-size:24px}
 .carta.belen .carta-imagen{position:sticky;top:0;z-index:2;margin:0;border-radius:16px 16px 10px 10px;height:min(30vh,300px);box-shadow:0 10px 18px rgba(240,228,200,.95)}
+
+#destello{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .6s ease;
+  background:radial-gradient(circle at 50% 45%,#fff8e4 0%,#ffe2a0 25%,rgba(255,214,140,.85) 50%,rgba(10,13,24,.95) 100%)}
+#destello.on{opacity:1}
+#s-sale .bloque{position:relative;z-index:3}
