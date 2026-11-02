@@ -7,6 +7,14 @@ Felicitación de Navidad interactiva de la **Parroquia de Santa Casilda** (Carab
 
 Web: https://fjpereirag.github.io/buena-noticia/
 
+## La cadena de cartas
+
+1. **Primer envío (la parroquia):** se comparte el enlace sin nada más, `https://fjpereirag.github.io/buena-noticia/`. Quien lo abre recibe la carta de la **Parroquia de Santa Casilda** («Querido amigo, querida amiga…»). Es el enlace que hay que mandar a los contactos y grupos de WhatsApp.
+2. **Al terminar de leerla**, cada persona pulsa «Enviar mi buena noticia», escribe su propia carta y se la manda a quien quiera. Ahora el remitente es ella.
+3. Quien recibe esa carta puede hacer lo mismo, y así sucesivamente.
+
+Para abrir directamente el formulario de escribir (sin pasar por la carta de la parroquia): `…/buena-noticia/?escribir`.
+
 ## Cómo publicarla (una sola vez)
 
 1. En GitHub, crea un repositorio público llamado **buena-noticia**.

@@ -104,7 +104,12 @@
 
   // ---------- quien recibe ----------
   const q = new URLSearchParams(location.search);
-  const R = { para: limpia(q.get('para'), 30), de: limpia(q.get('de'), 30), m: +q.get('m') || 2, e: +q.get('e') || 3, nota: limpia(q.get('n'), 140) };
+  // Sin parámetros, la web abre la carta de la parroquia (primer envío, para todos los amigos de WhatsApp).
+  const PARROQUIA = { para: '', de: 'Parroquia de Santa Casilda', m: 2, e: 3, nota: 'Esta Navidad queremos que esta buena noticia te llegue a ti. Y después, a quien tú quieras.', generica: true };
+  const conCarta = q.get('para') && q.get('de');
+  const R = conCarta
+    ? { para: limpia(q.get('para'), 30), de: limpia(q.get('de'), 30), m: +q.get('m') || 2, e: +q.get('e') || 3, nota: limpia(q.get('n'), 140), generica: false }
+    : PARROQUIA;
 
   async function abrirCarta() {
     arrancaMusica();
@@ -112,7 +117,7 @@
     const esc = ESCENAS.find((x) => x.id === R.e) || ESCENAS[0];
     $('#carta-img').src = esc.img;
     const fig = $('.carta-imagen'); fig.style.setProperty('--bx', esc.brillo[0]); fig.style.setProperty('--by', esc.brillo[1]);
-    $('#carta-para').textContent = R.para; $('#carta-de').textContent = R.de;
+    $('#carta-para').textContent = R.generica ? 'Querido amigo, querida amiga' : R.para; $('#carta-de').textContent = R.de;
     $('#carta-mensaje').textContent = msg.texto; $('#carta-nota').textContent = R.nota ? '«' + R.nota + '»' : '';
     const sobre = $('#sobre-llega'); sobre.className = 'sobre cerrado sellado'; sobre.parentElement.style.opacity = 1;
     ir('s-abrir');
@@ -236,12 +241,12 @@
   polvo.width = innerWidth; polvo.height = innerHeight;
   iniciaMapa();
   requestAnimationFrame(bucle);
-  if (R.para && R.de) {
-    $('#llega-para').textContent = R.para;
-    $('#llega-de').textContent = 'Te la envía ' + R.de + ' desde Belén.';
-    document.title = R.para + ', tienes una carta desde Belén';
-    ir('s-llega');
-  } else {
+  if (q.has('escribir')) {
     ir('s-inicio');
+  } else {
+    $('#llega-para').textContent = R.generica ? 'Amigo, amiga' : R.para;
+    $('#llega-de').textContent = R.generica ? 'Te la envía la Parroquia de Santa Casilda desde Belén.' : 'Te la envía ' + R.de + ' desde Belén.';
+    document.title = (R.generica ? 'Tienes una carta desde Belén' : R.para + ', tienes una carta desde Belén');
+    ir('s-llega');
   }
 })();
