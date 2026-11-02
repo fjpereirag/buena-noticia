@@ -9,7 +9,7 @@ Web: https://fjpereirag.github.io/buena-noticia/
 
 ## La cadena de cartas
 
-1. **Primer envío (la parroquia):** se comparte el enlace sin nada más, `https://fjpereirag.github.io/buena-noticia/`. Quien lo abre recibe la carta de la **Parroquia de Santa Casilda** («Querido amigo, querida amiga…»). Es el enlace que hay que mandar a los contactos y grupos de WhatsApp.
+1. **Primer envío (la parroquia):** se comparte el enlace sin nada más, `https://fjpereirag.github.io/buena-noticia/`. Quien lo abre ve primero cómo la carta sale de Belén (mapa 3D), cruza el Mediterráneo y llega a Madrid, a la Parroquia de Santa Casilda (hay un botón «Saltar»). Después recibe la carta de la **Parroquia de Santa Casilda** («Querido amigo, querida amiga…»). Es el enlace que hay que mandar a los contactos y grupos de WhatsApp.
 2. **Al terminar de leerla**, cada persona pulsa «Enviar mi buena noticia», escribe su propia carta y se la manda a quien quiera. Ahora el remitente es ella.
 3. Quien recibe esa carta puede hacer lo mismo, y así sucesivamente.
 
@@ -44,6 +44,7 @@ No hay servidor ni base de datos: la carta viaja entera dentro del enlace.
 | `index.html`, `estilo.css`, `app.js` | La web |
 | `vendor/three.min.js` | Three.js (licencia MIT) para el mapa 3D |
 | `assets/terreno.jpg`, `assets/altura.js` | Relieve ilustrado de Tierra Santa |
+| `assets/mediterraneo.js` | Costas del Mediterráneo (Natural Earth, dominio público) para el viaje Belén → Madrid |
 | `img/` | Ilustraciones (IA) y foto de la parroquia |
 | `audio/` | Voz de Álvaro (edge-tts) y «Noche de paz» (dominio público) |
 | `og.jpg` | Vista previa al compartir |

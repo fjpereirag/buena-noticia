@@ -107,10 +107,33 @@
     </div>
   </section>
 
+  <!-- ========== VIAJE DE LA CARTA: BELÉN → MADRID ========== -->
+  <section id="s-sale" class="pantalla transparente">
+    <div class="sobre-volando" id="sobre-sale" aria-hidden="true"><div class="sobre-icono"></div></div>
+    <div class="bloque abajo">
+      <p class="antetitulo">BELÉN · NOCHEBUENA</p>
+      <h2>De Belén sale<br><em>una buena noticia</em>…</h2>
+    </div>
+  </section>
+
+  <section id="s-ruta" class="pantalla transparente">
+    <div id="ruta" aria-hidden="true">
+      <div id="ruta-lienzo"></div>
+      <div class="sobre-volando visible" id="sobre-ruta"><div class="sobre-icono"></div></div>
+    </div>
+    <div class="bloque abajo">
+      <p class="antetitulo" id="ruta-ante">EN CAMINO</p>
+      <h2 id="ruta-txt">…y viaja hasta Madrid</h2>
+    </div>
+  </section>
+
+  <button id="saltar" class="saltar" hidden>Saltar</button>
+
   <!-- ========== QUIEN RECIBE ========== -->
   <section id="s-llega" class="pantalla">
     <div class="bloque abajo centrado">
-      <p class="antetitulo">DESDE BELÉN</p>
+      <figure class="foto foto-llega" id="llega-foto" hidden><img src="img/parroquia.webp" alt="Parroquia de Santa Casilda adornada para la Navidad"></figure>
+      <p class="antetitulo" id="llega-ante">DESDE BELÉN</p>
       <h1><em id="llega-para"></em>,<br>tienes una carta</h1>
       <p class="entradilla" id="llega-de"></p>
       <button class="boton" id="btn-abrir">Abrir la carta</button>
@@ -161,6 +184,7 @@
 
 <script src="vendor/three.min.js"></script>
 <script src="assets/altura.js"></script>
+<script src="assets/mediterraneo.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

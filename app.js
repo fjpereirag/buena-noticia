@@ -160,7 +160,7 @@
     }
     const idx = []; for (let i = 0; i < GH - 1; i++) for (let j = 0; j < GW - 1; j++) { const a = i * GW + j, b = a + 1, c = a + GW, d = c + 1; idx.push(a, c, b, b, c, d); }
     geo.setIndex(idx); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.computeVertexNormals();
-    const tex = new THREE.TextureLoader().load('assets/terreno.jpg'); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const tex = new THREE.TextureLoader().load('assets/terreno.jpg', () => { window.__mapaListo = true; }); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
     scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: tex })));
     const sol = new THREE.DirectionalLight(0xffe2b0, 0.9); sol.position.set(-8, 10, -6); scene.add(sol);
     scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x6a5434, 1.5));
@@ -192,10 +192,19 @@
     const P2 = new THREE.Vector3(BL.x, BL.y + 0.12, BL.z);
     const a = P0.clone().lerp(P1, u), b = P1.clone().lerp(P2, u); return a.lerp(b, u);
   }
+  // la carta sale de Belén hacia el oeste (recorrido inverso)
+  function sale() {
+    return new Promise((res) => {
+      const el = $('#sobre-sale');
+      if (!renderer) { setTimeout(res, 2500); return; }
+      vuelo = { inicio: performance.now(), dur: 3800, fin: res, el, inverso: true }; camModo = 'vuelo';
+      el.classList.add('visible');
+    });
+  }
   function vuela() {
     return new Promise((res) => {
       if (!renderer) { setTimeout(res, 2500); return; }
-      vuelo = { inicio: performance.now(), dur: 6500, fin: res }; camModo = 'vuelo';
+      vuelo = { inicio: performance.now(), dur: 6500, fin: res, el: sobreVolando }; camModo = 'vuelo';
       sobreVolando.classList.add('visible');
     });
   }
@@ -219,13 +228,13 @@
     const t = (now - t0) / 1000;
     if (renderer) {
       if (camModo === 'vuelo' && vuelo) {
-        const u = clamp((now - vuelo.inicio) / vuelo.dur), e = suave(u);
+        const u = clamp((now - vuelo.inicio) / vuelo.dur), e0 = suave(u), e = vuelo.inverso ? 1 - e0 : e0;
         colocaCamara(lerp(15, 10, e), lerp(46, 36, e), lerp(-48, -10, e), new THREE.Vector3(lerp(-3, BL.x, e), BL.y, lerp(3, BL.z + .4, e)));
         const p = puntoVuelo(e).project(camera);
         const x = (p.x * .5 + .5) * innerWidth, y = (-p.y * .5 + .5) * innerHeight, s = lerp(1.1, .45, e);
-        sobreVolando.style.transform = `translate(${x}px,${y}px) rotate(${lerp(-14, 4, e) + Math.sin(t * 3) * 3}deg) scale(${s})`;
-        glow.scale.setScalar(lerp(.6, 1.6, clamp((u - .8) / .2)));
-        if (u >= 1) { sobreVolando.classList.remove('visible'); const f = vuelo.fin; vuelo = null; camModo = 'llegada'; f(); }
+        vuelo.el.style.transform = `translate(${x}px,${y}px) rotate(${lerp(-14, 4, e) + Math.sin(t * 3) * 3}deg) scale(${s})`;
+        glow.scale.setScalar(vuelo.inverso ? lerp(1.8, 1.0, clamp(u / .3)) : lerp(.6, 1.6, clamp((u - .8) / .2)));
+        if (u >= 1) { vuelo.el.classList.remove('visible'); const f = vuelo.fin; vuelo = null; camModo = 'llegada'; f(); }
       } else {
         const az = reduce ? -6 : -10 + Math.sin(t * .06) * 14;
         colocaCamara(11.5 + Math.sin(t * .05) * .8, 38, az);
@@ -241,12 +250,78 @@
   polvo.width = innerWidth; polvo.height = innerHeight;
   iniciaMapa();
   requestAnimationFrame(bucle);
+  // ---------- viaje Belén → Madrid (primer envío, de la parroquia) ----------
+  let saltado = false;
+  function construyeRuta() {
+    const M = window.MED, [bx, by] = M.belen, [mx, my] = M.madrid;
+    const cx = (bx + mx) / 2, cy = Math.min(by, my) - 150;
+    const NS = 'http://www.w3.org/2000/svg';
+    $('#ruta-lienzo').innerHTML = `<svg xmlns="${NS}" width="${M.w}" height="${M.h}" viewBox="0 0 ${M.w} ${M.h}">
+      <defs><radialGradient id="halo"><stop offset="0" stop-color="#fff3cf" stop-opacity="1"/><stop offset=".3" stop-color="#ffd27a" stop-opacity=".7"/><stop offset="1" stop-color="#ffb84d" stop-opacity="0"/></radialGradient></defs>
+      <path class="mar-tierra" d="${M.d}"/>
+      <text class="ruta-mar" x="${(bx + mx) / 2 + 40}" y="${(by + my) / 2 + 70}" text-anchor="middle">MAR MEDITERRÁNEO</text>
+      <path id="ruta-camino" class="ruta-linea" d="M${bx} ${by} Q${cx} ${cy} ${mx} ${my}"/>
+      <circle class="ruta-halo" id="halo-belen" cx="${bx}" cy="${by}" r="40"/><circle class="ruta-punto" cx="${bx}" cy="${by}" r="6"/>
+      <text class="ruta-nombre" x="${bx - 12}" y="${by + 30}" text-anchor="end">BELÉN</text>
+      <circle class="ruta-halo" id="halo-madrid" cx="${mx}" cy="${my}" r="46" opacity="0"/><circle class="ruta-punto" cx="${mx}" cy="${my}" r="6"/>
+      <text class="ruta-nombre" x="${mx + 14}" y="${my - 14}">MADRID</text>
+      <text class="ruta-sub" id="ruta-sc" x="${mx + 14}" y="${my + 8}" opacity="0">Parroquia de Santa Casilda</text>
+    </svg>`;
+    return { bx, by, cx, cy, mx, my, M };
+  }
+  function viajaRuta() {
+    return new Promise((res) => {
+      const g = construyeRuta(), lienzo = $('#ruta-lienzo'), env = $('#sobre-ruta'), cam = $('#ruta-camino');
+      const largo = cam.getTotalLength(); cam.style.strokeDasharray = '2 7'; 
+      const clip = cam.cloneNode(); clip.removeAttribute('id'); clip.setAttribute('class', ''); clip.style.cssText = `fill:none;stroke:#fff;stroke-width:4;stroke-dasharray:${largo};stroke-dashoffset:${largo}`;
+      const mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask'); mask.id = 'm-ruta'; mask.appendChild(clip);
+      lienzo.querySelector('defs').appendChild(mask); cam.setAttribute('mask', 'url(#m-ruta)');
+      const ini = performance.now(), dur = 7500; env.style.opacity = 1;
+      function paso(now) {
+        if (saltado) { res(); return; }
+        const W = innerWidth, H = innerHeight, esc = Math.min(H * 0.46 / g.M.h, Math.max(W / g.M.w, H * 0.46 / g.M.h));
+        const u = clamp((now - ini) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+        const pt = cam.getPointAtLength(largo * e);
+        const zoom = esc * (1 + 0.18 * Math.sin(Math.PI * e));
+        let ox = W / 2 - pt.x * zoom, oy = H * 0.42 - pt.y * zoom;
+        ox = Math.min(0, Math.max(W - g.M.w * zoom, ox));
+        lienzo.style.transform = `translate(${ox}px,${oy}px) scale(${zoom})`;
+        clip.style.strokeDashoffset = largo * (1 - e);
+        const nx = cam.getPointAtLength(Math.min(largo, largo * e + 2));
+        const ang = Math.atan2(nx.y - pt.y, nx.x - pt.x) * 180 / Math.PI + 180;
+        const fin = clamp((u - .88) / .12); env.style.opacity = 1 - fin;
+        env.style.transform = `translate(${ox + pt.x * zoom}px,${oy + pt.y * zoom - 26 * (1 - fin)}px) rotate(${(ang * .25 + Math.sin(now / 300) * 3) * (1 - fin)}deg) scale(${(.75 - .2 * Math.abs(e - .5)) * (1 - .6 * fin)})`;
+        $('#halo-belen').setAttribute('opacity', 1 - e);
+        const lleg = clamp((u - .9) / .1); $('#halo-madrid').setAttribute('opacity', lleg); $('#ruta-sc').setAttribute('opacity', lleg);
+        if (u < 1) requestAnimationFrame(paso); else res();
+      }
+      requestAnimationFrame(paso);
+    });
+  }
+  async function viajeInicial() {
+    const bS = $('#saltar'); bS.hidden = false; bS.onclick = () => { saltado = true; };
+    ir('s-sale');
+    const t0m = performance.now(); while (!window.__mapaListo && performance.now() - t0m < 5000 && !saltado) await espera(100);
+    await Promise.race([sale(), new Promise((r) => { const iv = setInterval(() => { if (saltado) { clearInterval(iv); r(); } }, 100); })]);
+    if (!saltado) { ir('s-ruta'); await viajaRuta(); }
+    if (!saltado) {
+      $('#ruta-ante').textContent = 'MADRID · CARABANCHEL'; $('#ruta-txt').innerHTML = 'Ha llegado a la<br><em>Parroquia de Santa Casilda</em>';
+      await espera(2600);
+    }
+    if (vuelo) { vuelo.el.classList.remove('visible'); vuelo = null; }
+    bS.hidden = true; camModo = 'reposo';
+    ir('s-llega');
+  }
+
   if (q.has('escribir')) {
     ir('s-inicio');
   } else {
     $('#llega-para').textContent = R.generica ? 'Amigo, amiga' : R.para;
-    $('#llega-de').textContent = R.generica ? 'Te la envía la Parroquia de Santa Casilda desde Belén.' : 'Te la envía ' + R.de + ' desde Belén.';
+    $('#llega-de').textContent = R.generica ? 'Desde la Parroquia de Santa Casilda te la enviamos a ti.' : 'Te la envía ' + R.de + ' desde Belén.';
     document.title = (R.generica ? 'Tienes una carta desde Belén' : R.para + ', tienes una carta desde Belén');
-    ir('s-llega');
+    if (R.generica) {
+      $('#llega-foto').hidden = false; $('#llega-ante').textContent = 'DE BELÉN A CARABANCHEL';
+      viajeInicial();
+    } else ir('s-llega');
   }
 })();

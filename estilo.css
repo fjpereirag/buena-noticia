@@ -145,3 +145,22 @@ h1 em,h2 em{font-style:italic;color:var(--oro)}
 }
 
 .relevo{font-style:italic;font-size:21px;line-height:1.3;color:#e9dcbc;margin:0 6px 14px}
+
+/* ---------- viaje Belén → Madrid ---------- */
+#s-ruta{background:radial-gradient(ellipse at 50% 35%,#16203d 0%,#0a0d18 70%)}
+#ruta{position:absolute;inset:0;overflow:hidden}
+#ruta-lienzo{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#ruta-lienzo svg{display:block;overflow:visible}
+.mar-tierra{fill:#2c2618;stroke:#d9b66a;stroke-width:.9;stroke-opacity:.6}
+#s-ruta .bloque,#s-sale .bloque{position:relative;z-index:3}
+#s-ruta .bloque{background:linear-gradient(transparent,rgba(6,7,12,.85) 30%);margin:0 -20px -28px;padding:60px 20px 28px;width:calc(100% + 40px);max-width:none}
+.ruta-linea{fill:none;stroke:#f3d79a;stroke-width:2.4;stroke-dasharray:2 7;stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(255,210,130,.8))}
+.ruta-punto{fill:#b3261e;stroke:#ffe9b0;stroke-width:2}
+.ruta-halo{fill:url(#halo)}
+.ruta-nombre{font-family:var(--caps);font-size:17px;letter-spacing:.14em;fill:#f2e2b8;paint-order:stroke;stroke:#0a0d18;stroke-width:4px}
+.ruta-sub{font-family:var(--serif);font-style:italic;font-size:15px;fill:#e2be6e;paint-order:stroke;stroke:#0a0d18;stroke-width:4px}
+.ruta-mar{font-family:var(--caps);font-size:15px;letter-spacing:.5em;fill:#7f93b8;opacity:.6}
+#sobre-ruta{z-index:2}
+.saltar{position:fixed;left:16px;top:max(16px,env(safe-area-inset-top));z-index:7;background:rgba(10,13,24,.55);border:1px solid rgba(226,190,110,.45);
+  color:#e9dcbc;border-radius:20px;padding:8px 14px;font-size:16px;cursor:pointer}
+.foto-llega{max-width:300px;margin:0 auto 18px;aspect-ratio:4/3}
