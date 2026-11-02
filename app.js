@@ -111,7 +111,55 @@
     ? { para: limpia(q.get('para'), 30), de: limpia(q.get('de'), 30), m: +q.get('m') || 2, e: +q.get('e') || 3, nota: limpia(q.get('n'), 140), generica: false }
     : PARROQUIA;
 
+  // ---------- la carta de Belén (texto de prueba) ----------
+  const CARTA_BELEN = [
+    { t: 'Cerca de Belén, unos pastores velaban por turnos su rebaño.', v: 'audio/voz_01.mp3', img: 'img/escena2.webp', b: ['37%', '79%'] },
+    { t: 'Una noche como tantas otras, les sorprendió un anuncio:', v: 'audio/voz_02.mp3', img: 'img/escena3.webp', b: ['50%', '24%'] },
+    { t: '«No temáis, os traigo una buena noticia».', v: 'audio/voz_03.mp3', cls: 'cita' },
+    { t: 'El ángel no les pidió que cambiaran antes de escucharla.', v: 'audio/voz_04.mp3', img: 'img/escena4.webp', b: ['10%', '85%'] },
+    { t: 'La buena noticia llega hoy a tu vida tal como estás, con tus luces y tus sombras.', v: 'audio/voz_05.mp3', img: 'img/escena5.webp', b: ['32%', '42%'] },
+    { t: 'Va a nacer el Salvador, y te está esperando.', v: 'audio/voz_06.mp3', img: 'img/escena6.webp', b: ['52%', '48%'], cls: 'fuerte' },
+    { t: '«Vayamos a Belén», se dijeron.', v: 'audio/voz_07.mp3', img: 'img/escena7.webp', b: ['57%', '71%'], cls: 'cita' },
+    { t: 'Tú también puedes dar un paso pequeño este año.', v: 'audio/voz_08.mp3', img: 'img/escena8.webp', b: ['49%', '37%'] },
+    { t: '«No hace falta tenerlo todo en orden para ir a su encuentro.»', v: 'audio/voz_09.mp3', img: 'img/escena9.webp', b: ['58%', '49%'], cls: 'destacado' },
+    { t: 'Basta con abrirle una rendija al corazón y dejar que su luz entre por fin en casa.', v: 'audio/voz_10.mp3' }
+  ];
+  function cambiaImagen(src, b) {
+    const im = $('#carta-img'), fig = $('.carta-imagen');
+    im.style.opacity = 0;
+    setTimeout(() => { im.src = src; fig.style.setProperty('--bx', b[0]); fig.style.setProperty('--by', b[1]); im.style.opacity = 1; }, 450);
+  }
+  async function abrirCartaBelen() {
+    arrancaMusica();
+    $('#carta').classList.add('belen');
+    $('#carta-img').src = CARTA_BELEN[0].img;
+    $('#carta-para').textContent = 'Querido amigo, querida amiga';
+    $('#carta-de').textContent = 'Parroquia de Santa Casilda';
+    $('#carta-mensaje').textContent = ''; $('#carta-nota').textContent = '';
+    const cuerpo = $('#carta-mensaje');
+    const sobre = $('#sobre-llega'); sobre.className = 'sobre cerrado sellado'; sobre.parentElement.style.opacity = 1;
+    ir('s-abrir');
+    await espera(900); sobre.classList.add('roto');
+    await espera(700); sobre.classList.remove('cerrado');
+    await espera(1000); sobre.parentElement.style.transition = 'opacity .6s'; sobre.parentElement.style.opacity = 0;
+    $('#carta').classList.add('abierta');
+    await espera(900);
+    const partes = $$('.carta-texto > *');
+    partes[0].classList.add('ver'); await espera(400); partes[1].classList.add('ver');
+    await habla(VOZ_TITULO);
+    partes[2].classList.add('ver');
+    for (const p of CARTA_BELEN) {
+      if (p.img) cambiaImagen(p.img, p.b);
+      const el = document.createElement('span'); el.className = 'parrafo ' + (p.cls || ''); el.textContent = p.t;
+      cuerpo.appendChild(el); requestAnimationFrame(() => el.classList.add('ver'));
+      const carta = $('#carta'); carta.scrollTo({ top: carta.scrollHeight, behavior: 'smooth' });
+      await habla(p.v); await espera(350);
+    }
+    partes[4].classList.add('ver'); await espera(900);
+    $('#btn-seguir').classList.add('ver'); $('#carta').scrollTo({ top: $('#carta').scrollHeight, behavior: 'smooth' });
+  }
   async function abrirCarta() {
+    if (R.generica) return abrirCartaBelen();
     arrancaMusica();
     const msg = MENSAJES.find((x) => x.id === R.m) || MENSAJES[1];
     const esc = ESCENAS.find((x) => x.id === R.e) || ESCENAS[0];
@@ -136,6 +184,11 @@
   }
   $('#btn-seguir').addEventListener('click', () => { ir('s-parroquia'); camModo = 'reposo'; habla(VOZ_FINAL); });
   $('#btn-abrir').addEventListener('click', abrirCarta);
+  // reenviar la misma carta de Belén
+  const ENLACE = location.origin + location.pathname;
+  $('#btn-reenviar').href = 'https://wa.me/?text=' + encodeURIComponent('✉️ Tienes una carta desde Belén. Es una buena noticia para ti.\nÁbrela aquí: ' + ENLACE);
+  $('#btn-copiar2').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ENLACE); aviso('Enlace copiado'); } catch (e) { prompt('Copia el enlace:', ENLACE); } });
+  $('#btn-otra-vez').addEventListener('click', () => { location.href = ENLACE; });
 
   // ---------- mapa 3D de Tierra Santa ----------
   const lienzo = $('#mapa');

@@ -7,13 +7,14 @@ Felicitación de Navidad interactiva de la **Parroquia de Santa Casilda** (Carab
 
 Web: https://fjpereirag.github.io/buena-noticia/
 
-## La cadena de cartas
+## Cómo funciona
 
-1. **Primer envío (la parroquia):** se comparte el enlace sin nada más, `https://fjpereirag.github.io/buena-noticia/`. Quien lo abre ve primero cómo la carta sale de Belén (mapa 3D), cruza el Mediterráneo y llega a Madrid, a la Parroquia de Santa Casilda (hay un botón «Saltar»). Después recibe la carta de la **Parroquia de Santa Casilda** («Querido amigo, querida amiga…»). Es el enlace que hay que mandar a los contactos y grupos de WhatsApp.
-2. **Al terminar de leerla**, cada persona pulsa «Enviar mi buena noticia», escribe su propia carta y se la manda a quien quiera. Ahora el remitente es ella.
-3. Quien recibe esa carta puede hacer lo mismo, y así sucesivamente.
+1. Se comparte el enlace `https://fjpereirag.github.io/buena-noticia/`.
+2. Quien lo abre ve cómo la carta sale de Belén (mapa 3D), cruza el Mediterráneo y llega a Madrid, a la Parroquia de Santa Casilda (botón «Saltar» para ir directo).
+3. La parroquia le entrega la carta: «Querido amigo, querida amiga: Belén, una buena noticia para ti». Se abre el sobre y la voz de Álvaro la lee párrafo a párrafo, con la imagen de cada escena.
+4. Al final, «Feliz Navidad · Te esperamos» y el botón **Reenviar por WhatsApp**, que manda el mismo enlace a quien uno quiera.
 
-Para abrir directamente el formulario de escribir (sin pasar por la carta de la parroquia): `…/buena-noticia/?escribir`.
+El texto de la carta está en `app.js`, en la lista `CARTA_BELEN` (texto, voz e imagen de cada párrafo). Es provisional: para cambiarlo hay que regenerar también las voces (`voz_navidad.py`).
 
 ## Cómo publicarla (una sola vez)
 
