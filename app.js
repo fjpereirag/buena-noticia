@@ -39,9 +39,13 @@
   const musica = new Audio('audio/musica.mp3'); musica.loop = true; musica.volume = 0.45;
   let mudo = false, vozActual = null;
   const btnSonido = $('#sonido');
-  btnSonido.addEventListener('click', () => {
-    mudo = !mudo; btnSonido.classList.toggle('mudo', mudo);
-    musica.muted = mudo; if (vozActual) vozActual.muted = mudo;
+  const sonando = () => !musica.paused && !musica.muted;
+  function marcaBoton() { btnSonido.classList.toggle('apagado', musica.paused); btnSonido.classList.toggle('mudo', mudo && !musica.paused); }
+  musica.addEventListener('play', marcaBoton); musica.addEventListener('pause', marcaBoton);
+  btnSonido.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (musica.paused) { mudo = false; musica.muted = false; arrancaMusica(); return; }
+    mudo = !mudo; musica.muted = mudo; if (vozActual) vozActual.muted = mudo; marcaBoton();
   });
   // volumen de la música mediante Web Audio (en iPhone audio.volume no funciona)
   let actx = null, ganancia = null;
@@ -58,8 +62,12 @@
       }
       if (actx && actx.state === 'suspended') actx.resume();
     } catch (e) { actx = null; ganancia = null; }
-    musica.play().catch(() => {});
+    musica.play().then(marcaBoton).catch(marcaBoton);
   }
+  // intenta sonar nada más abrir; si el navegador no lo deja, arranca con el primer toque en cualquier sitio
+  musica.play().then(marcaBoton).catch(marcaBoton);
+  const primerToque = () => { if (!mudo) arrancaMusica(); ['pointerdown', 'keydown', 'touchstart'].forEach((e) => removeEventListener(e, primerToque, true)); };
+  ['pointerdown', 'keydown', 'touchstart'].forEach((e) => addEventListener(e, primerToque, true));
   function habla(src) {
     return new Promise((res) => {
       const a = new Audio(src); vozActual = a; a.muted = mudo;

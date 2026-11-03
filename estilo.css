@@ -215,3 +215,12 @@ h1 em,h2 em{font-style:italic;color:var(--oro)}
 #car-seguir.ver{display:inline-flex}
 .car-saludo.ver,.car-firma.ver{opacity:1}
 [hidden]{display:none!important}
+
+.sonido{transition:width .4s,border-radius .4s,background .4s}
+.sonido .sonido-txt{display:none;white-space:nowrap;font-family:var(--caps);font-size:12px;letter-spacing:.08em}
+.sonido.apagado{width:auto;padding:0 14px;border-radius:22px;gap:8px;display:flex;align-items:center;background:rgba(226,190,110,.92);color:#2a1d08;
+  animation:llama 1.8s ease-in-out infinite}
+.sonido.apagado .sonido-txt{display:inline}
+.sonido.apagado svg{display:none}
+@keyframes llama{0%,100%{box-shadow:0 0 0 0 rgba(226,190,110,.6)}50%{box-shadow:0 0 0 10px rgba(226,190,110,0)}}
+.sonido.apagado{top:calc(max(16px,env(safe-area-inset-top)) + 64px);right:50%;transform:translateX(50%);height:40px}
