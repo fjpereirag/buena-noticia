@@ -9,7 +9,7 @@ Web: https://fjpereirag.github.io/buena-noticia/
 
 ## Cómo funciona
 
-1. Se comparte el enlace `https://fjpereirag.github.io/buena-noticia/`.
+1. Se comparte el enlace (al abrirlo, una portada con el botón «Recibir la carta» pone en marcha la música) `https://fjpereirag.github.io/buena-noticia/`.
 2. Quien lo abre ve cómo la carta sale de Belén (mapa 3D), da el salto y llega en 3D a Madrid, a Carabanchel, a la Parroquia de Santa Casilda (botón «Saltar» para ir directo).
 3. La parroquia le entrega la carta: «Querido amigo, querida amiga: Belén, una buena noticia para ti». Se rompe el lacre y la carta se muestra como en el vídeo: un carrusel 3D de tarjetas flotantes con las ilustraciones, y cada frase aparece palabra a palabra mientras la lee la voz de Álvaro.
 4. Al final, «Feliz Navidad · Te esperamos» y el botón **Reenviar por WhatsApp**, que manda el mismo enlace a quien uno quiera.
@@ -47,5 +47,5 @@ No hay servidor ni base de datos: la carta viaja entera dentro del enlace.
 | `assets/terreno.jpg`, `assets/altura.js` | Relieve ilustrado de Tierra Santa |
 | `assets/terreno-madrid.jpg`, `assets/altura-madrid.js` | Relieve ilustrado de Madrid (Sierra de Guadarrama, Manzanares, Jarama, Tajo) donde llega la carta, en Carabanchel |
 | `img/` | Ilustraciones (IA) y foto de la parroquia |
-| `audio/` | Voz de Álvaro (edge-tts) y «Noche de paz» (dominio público) |
+| `audio/` | Voz de Álvaro (edge-tts) y arreglo de «Noche de paz» (dominio público) para arpa, piano, cuerdas y campanas, 2 min 45 s en bucle |
 | `og.jpg` | Vista previa al compartir |

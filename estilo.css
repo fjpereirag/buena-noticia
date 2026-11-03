@@ -214,3 +214,4 @@ h1 em,h2 em{font-style:italic;color:var(--oro)}
 #car-seguir{display:none}
 #car-seguir.ver{display:inline-flex}
 .car-saludo.ver,.car-firma.ver{opacity:1}
+[hidden]{display:none!important}

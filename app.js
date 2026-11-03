@@ -36,19 +36,35 @@
   const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
   // ---------- sonido ----------
-  const musica = new Audio('audio/musica.mp3'); musica.loop = true; musica.volume = 0.32;
+  const musica = new Audio('audio/musica.mp3'); musica.loop = true; musica.volume = 0.45;
   let mudo = false, vozActual = null;
   const btnSonido = $('#sonido');
   btnSonido.addEventListener('click', () => {
     mudo = !mudo; btnSonido.classList.toggle('mudo', mudo);
     musica.muted = mudo; if (vozActual) vozActual.muted = mudo;
   });
-  function arrancaMusica() { btnSonido.hidden = false; musica.play().catch(() => {}); }
+  // volumen de la música mediante Web Audio (en iPhone audio.volume no funciona)
+  let actx = null, ganancia = null;
+  function volumen(v) {
+    if (ganancia) { const t = actx.currentTime; ganancia.gain.cancelScheduledValues(t); ganancia.gain.setTargetAtTime(v, t, 0.25); }
+    else musica.volume = v;
+  }
+  function arrancaMusica() {
+    btnSonido.hidden = false;
+    try {
+      if (!actx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) { actx = new AC(); const src = actx.createMediaElementSource(musica); ganancia = actx.createGain(); ganancia.gain.value = 0.45; src.connect(ganancia).connect(actx.destination); musica.volume = 1; }
+      }
+      if (actx && actx.state === 'suspended') actx.resume();
+    } catch (e) { actx = null; ganancia = null; }
+    musica.play().catch(() => {});
+  }
   function habla(src) {
     return new Promise((res) => {
       const a = new Audio(src); vozActual = a; a.muted = mudo;
-      musica.volume = 0.14;
-      const fin = () => { musica.volume = 0.32; res(); };
+      volumen(0.16);
+      const fin = () => { volumen(0.45); res(); };
       a.addEventListener('ended', fin, { once: true }); a.addEventListener('error', fin, { once: true });
       a.play().catch(fin);
     });
@@ -133,9 +149,9 @@
   function hablaFrase(src, el) {
     const spans = [...el.children];
     return new Promise((res) => {
-      const a = new Audio(src); vozActual = a; a.muted = mudo; musica.volume = 0.14;
+      const a = new Audio(src); vozActual = a; a.muted = mudo; volumen(0.16);
       let fin = false;
-      const acaba = () => { if (fin) return; fin = true; spans.forEach((s) => s.classList.add('ya')); musica.volume = 0.32; res(); };
+      const acaba = () => { if (fin) return; fin = true; spans.forEach((s) => s.classList.add('ya')); volumen(0.45); res(); };
       const pinta = () => {
         if (fin) return;
         const d = a.duration && isFinite(a.duration) ? a.duration : 4, u = Math.min(1, a.currentTime / (d * 0.82));
@@ -415,7 +431,8 @@
     document.title = (R.generica ? 'Tienes una carta desde Belén' : R.para + ', tienes una carta desde Belén');
     if (R.generica) {
       $('#llega-foto').hidden = false; $('#llega-ante').textContent = 'DE BELÉN A CARABANCHEL';
-      viajeInicial();
+      ir('s-portada');
+      $('#btn-empezar').addEventListener('click', () => { arrancaMusica(); viajeInicial(); }, { once: true });
     } else ir('s-llega');
   }
 })();
