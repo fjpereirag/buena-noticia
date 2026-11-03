@@ -11,7 +11,7 @@ Web: https://fjpereirag.github.io/buena-noticia/
 
 1. Se comparte el enlace `https://fjpereirag.github.io/buena-noticia/`.
 2. Quien lo abre ve cómo la carta sale de Belén (mapa 3D), da el salto y llega en 3D a Madrid, a Carabanchel, a la Parroquia de Santa Casilda (botón «Saltar» para ir directo).
-3. La parroquia le entrega la carta: «Querido amigo, querida amiga: Belén, una buena noticia para ti». Se abre el sobre y la voz de Álvaro la lee párrafo a párrafo, con la imagen de cada escena.
+3. La parroquia le entrega la carta: «Querido amigo, querida amiga: Belén, una buena noticia para ti». Se rompe el lacre y la carta se muestra como en el vídeo: un carrusel 3D de tarjetas flotantes con las ilustraciones, y cada frase aparece palabra a palabra mientras la lee la voz de Álvaro.
 4. Al final, «Feliz Navidad · Te esperamos» y el botón **Reenviar por WhatsApp**, que manda el mismo enlace a quien uno quiera.
 
 El texto de la carta está en `app.js`, en la lista `CARTA_BELEN` (texto, voz e imagen de cada párrafo). Es provisional: para cambiarlo hay que regenerar también las voces (`voz_navidad.py`).

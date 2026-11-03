@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="estilo.css?v=6">
+<link rel="stylesheet" href="estilo.css?v=7">
 </head>
 <body>
 <canvas id="mapa" aria-hidden="true"></canvas>
@@ -154,6 +154,17 @@
     </article>
   </section>
 
+  <section id="s-carrusel" class="pantalla">
+    <div class="car-escena" aria-hidden="true"><div class="car-anillo" id="car-anillo"></div></div>
+    <div class="car-puntos" id="car-puntos" aria-hidden="true"></div>
+    <div class="car-texto">
+      <p class="car-saludo" id="car-saludo">Querido amigo, querida amiga:</p>
+      <p class="car-frase" id="car-frase" aria-live="polite"></p>
+      <p class="car-firma" id="car-firma">— Parroquia de Santa Casilda</p>
+      <button class="boton" id="car-seguir">Seguir</button>
+    </div>
+  </section>
+
   <section id="s-parroquia" class="pantalla">
     <div class="parroquia">
       <figure class="foto"><img src="img/parroquia.webp" alt="Presbiterio de la Parroquia de Santa Casilda adornado para la Navidad, con el belén ante el altar"></figure>
@@ -177,8 +188,8 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/three.min.js"></script>
-<script src="assets/altura.js?v=6"></script>
-<script src="assets/altura-madrid.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="assets/altura.js?v=7"></script>
+<script src="assets/altura-madrid.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

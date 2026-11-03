@@ -27,7 +27,7 @@
   function ir(id) {
     if (actual) $('#' + actual).classList.remove('activa');
     actual = id; const el = $('#' + id); el.classList.add('activa'); el.scrollTop = 0;
-    document.body.classList.toggle('oscuro', ['s-carta-form', 's-parroquia', 's-abrir', 's-sello'].includes(id));
+    document.body.classList.toggle('oscuro', ['s-carta-form', 's-parroquia', 's-abrir', 's-sello', 's-carrusel'].includes(id));
     if (id === 's-carta-form') { camModo = 'reposo'; history.replaceState(null, '', location.pathname); }
   }
   $$('[data-ir]').forEach((b) => b.addEventListener('click', () => ir(b.dataset.ir)));
@@ -129,35 +129,90 @@
     im.style.opacity = 0;
     setTimeout(() => { im.src = src; fig.style.setProperty('--bx', b[0]); fig.style.setProperty('--by', b[1]); im.style.opacity = 1; }, 450);
   }
+  // voz con las palabras apareciendo a su ritmo
+  function hablaFrase(src, el) {
+    const spans = [...el.children];
+    return new Promise((res) => {
+      const a = new Audio(src); vozActual = a; a.muted = mudo; musica.volume = 0.14;
+      let fin = false;
+      const acaba = () => { if (fin) return; fin = true; spans.forEach((s) => s.classList.add('ya')); musica.volume = 0.32; res(); };
+      const pinta = () => {
+        if (fin) return;
+        const d = a.duration && isFinite(a.duration) ? a.duration : 4, u = Math.min(1, a.currentTime / (d * 0.82));
+        const n = Math.ceil(u * spans.length); spans.forEach((s, i) => s.classList.toggle('ya', i < n));
+        requestAnimationFrame(pinta);
+      };
+      a.addEventListener('ended', acaba, { once: true });
+      a.addEventListener('error', () => { setTimeout(acaba, 2500); }, { once: true });
+      a.play().then(() => requestAnimationFrame(pinta)).catch(() => {
+        // sin audio: revela por tiempo
+        const t0 = performance.now(), dur = 600 + spans.length * 330;
+        (function f() { const u = (performance.now() - t0) / dur; spans.forEach((s, i) => s.classList.toggle('ya', i < Math.ceil(u * spans.length))); if (u < 1) requestAnimationFrame(f); else setTimeout(acaba, 500); })();
+      });
+    });
+  }
+  function ponFrase(texto, clase) {
+    const el = $('#car-frase'); el.className = 'car-frase ' + (clase || '');
+    el.innerHTML = ''; texto.split(' ').forEach((w, i) => { const sp = document.createElement('span'); sp.textContent = (i ? ' ' : '') + w; el.appendChild(sp); });
+    return el;
+  }
+  // carrusel 3D de tarjetas flotantes
+  let tarjetas = [], posCar = 0, posObjetivo = 0, carVivo = false;
+  function montaCarrusel() {
+    const imgs = []; CARTA_BELEN.forEach((p) => { if (p.img && !imgs.find((x) => x.img === p.img)) imgs.push({ img: p.img, b: p.b }); });
+    const anillo = $('#car-anillo'), puntos = $('#car-puntos'); anillo.innerHTML = ''; puntos.innerHTML = '';
+    tarjetas = imgs.map((x) => {
+      const t = document.createElement('div'); t.className = 'tarjeta'; t.style.setProperty('--bx', x.b[0]); t.style.setProperty('--by', x.b[1]);
+      t.innerHTML = `<img src="${x.img}" alt=""><div class="luz"></div><div class="brillo-paso"></div><div class="sombra"></div><div class="marco"></div>`;
+      anillo.appendChild(t); puntos.appendChild(document.createElement('i')); t.dataset.img = x.img; return t;
+    });
+    posCar = posObjetivo = 0;
+    if (!carVivo) { carVivo = true; requestAnimationFrame(animaCarrusel); }
+  }
+  function animaCarrusel(now) {
+    const t = now / 1000; posCar += (posObjetivo - posCar) * 0.06;
+    const cw = tarjetas[0] ? tarjetas[0].offsetWidth : 260;
+    tarjetas.forEach((el, k) => {
+      const d = k - posCar, ad = Math.abs(d);
+      const tx = d * cw * 0.84 * (1 - .1 * Math.min(ad, 2)), tz = -Math.min(ad, 2.2) * cw * 0.62, ry = -Math.sign(d) * Math.min(ad, 1) * 34;
+      const bob = cw * 0.03 * Math.sin(t * 1.2 + k * 1.7), rz = 1.3 * Math.sin(t * .86 + k * 2.3);
+      el.style.transform = `translateX(${tx}px) translateY(${bob}px) translateZ(${tz}px) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+      el.style.opacity = Math.max(0, Math.min(1, 1.9 - ad)); el.style.zIndex = 100 - Math.round(ad * 10);
+      el.children[3].style.opacity = Math.min(.75, ad * .55); el.children[4].style.opacity = Math.max(0, 1 - ad * 2) * .6;
+    });
+    $('#car-anillo').style.transform = `rotateY(${3 * Math.sin(t * .78)}deg) rotateX(${1.6 * Math.sin(t * .57)}deg)`;
+    [...$('#car-puntos').children].forEach((p, k) => p.classList.toggle('on', Math.abs(k - posCar) < .5));
+    if (actual === 's-carrusel' || actual === 's-abrir') requestAnimationFrame(animaCarrusel); else carVivo = false;
+  }
+  function irTarjeta(img) {
+    const k = tarjetas.findIndex((t) => t.dataset.img === img); if (k < 0 || k === posObjetivo) return;
+    posObjetivo = k; const t = tarjetas[k]; t.classList.remove('llega'); void t.offsetWidth; setTimeout(() => t.classList.add('llega'), 500);
+  }
   async function abrirCartaBelen() {
     arrancaMusica();
-    $('#carta').classList.add('belen');
-    $('#carta-img').src = CARTA_BELEN[0].img;
-    $('#carta-para').textContent = 'Querido amigo, querida amiga';
-    $('#carta-de').textContent = 'Parroquia de Santa Casilda';
-    $('#carta-mensaje').textContent = ''; $('#carta-nota').textContent = '';
-    const cuerpo = $('#carta-mensaje');
     const sobre = $('#sobre-llega'); sobre.className = 'sobre cerrado sellado'; sobre.parentElement.style.opacity = 1;
+    $('#carta').style.display = 'none';
     ir('s-abrir');
     await espera(900); sobre.classList.add('roto');
     await espera(700); sobre.classList.remove('cerrado');
-    await espera(1000); sobre.parentElement.style.transition = 'opacity .6s'; sobre.parentElement.style.opacity = 0;
-    $('#carta').classList.add('abierta');
     await espera(900);
-    const partes = $$('.carta-texto > *');
-    partes[0].classList.add('ver'); await espera(400); partes[1].classList.add('ver');
-    await habla(VOZ_TITULO);
-    partes[2].classList.add('ver');
+    montaCarrusel();
+    $('#car-saludo').classList.remove('ver'); $('#car-firma').classList.remove('ver'); $('#car-seguir').classList.remove('ver');
+    ponFrase('');
+    ir('s-carrusel');
+    await espera(900);
+    $('#car-saludo').classList.add('ver');
+    await hablaFrase(VOZ_TITULO, ponFrase('Belén: una buena noticia para ti', 'titulo'));
+    await espera(300); $('#car-saludo').classList.remove('ver');
     for (const p of CARTA_BELEN) {
-      if (p.img) cambiaImagen(p.img, p.b);
-      const el = document.createElement('span'); el.className = 'parrafo ' + (p.cls || ''); el.textContent = p.t;
-      cuerpo.appendChild(el); requestAnimationFrame(() => el.classList.add('ver'));
-      const carta = $('#carta'); carta.scrollTo({ top: carta.scrollHeight, behavior: 'smooth' });
-      await habla(p.v); await espera(350);
+      if (p.img) irTarjeta(p.img);
+      await hablaFrase(p.v, ponFrase(p.t, p.cls));
+      await espera(450);
     }
-    partes[4].classList.add('ver'); await espera(900);
-    $('#btn-seguir').classList.add('ver'); $('#carta').scrollTo({ top: $('#carta').scrollHeight, behavior: 'smooth' });
+    $('#car-firma').classList.add('ver'); await espera(900);
+    $('#car-seguir').classList.add('ver');
   }
+  $('#car-seguir').addEventListener('click', () => { ir('s-parroquia'); camModo = 'reposo'; habla(VOZ_FINAL); });
   async function abrirCarta() {
     if (R.generica) return abrirCartaBelen();
     arrancaMusica();

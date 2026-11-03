@@ -180,3 +180,37 @@ h1 em,h2 em{font-style:italic;color:var(--oro)}
   background:radial-gradient(circle at 50% 45%,#fff8e4 0%,#ffe2a0 25%,rgba(255,214,140,.85) 50%,rgba(10,13,24,.95) 100%)}
 #destello.on{opacity:1}
 #s-sale .bloque{position:relative;z-index:3}
+
+/* ---------- carrusel de la carta (como en el vídeo) ---------- */
+#s-carrusel{justify-content:flex-start;padding:0;overflow:hidden}
+.car-escena{position:absolute;left:50%;top:calc(46% - 6vh);width:0;height:0;perspective:1400px}
+.car-anillo{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.tarjeta{position:absolute;width:var(--cw);height:calc(var(--cw) * 1.79);margin-left:calc(var(--cw) / -2);margin-top:calc(var(--cw) * -0.895);
+  border-radius:18px;overflow:hidden;box-shadow:0 26px 60px rgba(0,0,0,.7);will-change:transform,opacity;
+  -webkit-box-reflect:below 10px linear-gradient(transparent 80%,rgba(255,255,255,.14))}
+#s-carrusel{--cw:min(58vw,300px,calc((100vh - 300px) / 1.79))}
+.tarjeta img{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;animation:kb 14s ease-in-out infinite alternate}
+.tarjeta:nth-child(2n) img{animation-name:kb2}
+.tarjeta .luz{position:absolute;inset:0;mix-blend-mode:screen;background:radial-gradient(circle at var(--bx) var(--by),rgba(255,190,100,.45),transparent 32%);animation:parpadeo 2.7s infinite}
+.tarjeta .sombra{position:absolute;inset:0;background:#05060a;transition:opacity .9s}
+.tarjeta .marco{position:absolute;inset:0;border-radius:18px;border:2px solid #d9b66a;opacity:0;transition:opacity .9s}
+.tarjeta .brillo-paso{position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,240,210,.28) 50%,transparent 65%);transform:translateX(-120%);mix-blend-mode:screen}
+.tarjeta.llega .brillo-paso{transition:transform 1.6s ease;transform:translateX(120%)}
+@keyframes kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.12) translate(-3%,-2%)}}
+@keyframes kb2{from{transform:scale(1.1) translate(-2%,2%)}to{transform:scale(1) translate(2%,-1%)}}
+.car-puntos{position:absolute;left:0;right:0;top:calc(46% - 6vh + var(--cw) * 0.895 + 26px);display:flex;justify-content:center;gap:9px}
+.car-puntos i{display:block;height:7px;width:7px;border-radius:7px;background:#8a7a5a;opacity:.55;transition:all .6s}
+.car-puntos i.on{width:24px;background:#e2be6e;opacity:1}
+.car-texto{position:absolute;left:0;right:0;bottom:max(22px,env(safe-area-inset-bottom));padding:0 22px;text-align:center}
+.car-saludo{font-style:italic;font-size:20px;color:#d8c49a;opacity:0;transition:opacity .8s;margin-bottom:6px}
+.car-frase{font-weight:600;font-size:clamp(23px,6.2vw,30px);line-height:1.25;color:#fff;min-height:3.8em;text-shadow:0 2px 14px rgba(0,0,0,.85)}
+.car-frase span{opacity:.18;transition:opacity .25s}
+.car-frase span.ya{opacity:1}
+.car-frase.titulo{font-family:var(--script);font-weight:400;color:var(--oro);font-size:clamp(34px,10vw,46px)}
+.car-frase.destacado{font-style:italic;color:#ecc979}
+.car-frase.cita{font-style:italic}
+.car-firma{font-style:italic;font-size:20px;color:#e9dcbc;opacity:0;transition:opacity .8s;height:0}
+.car-firma.ver{height:auto;margin:4px 0 10px}
+#car-seguir{display:none}
+#car-seguir.ver{display:inline-flex}
+.car-saludo.ver,.car-firma.ver{opacity:1}
