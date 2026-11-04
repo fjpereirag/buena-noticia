@@ -182,11 +182,13 @@
   }
   // carrusel 3D de tarjetas flotantes
   let tarjetas = [], posCar = 0, posObjetivo = 0, carVivo = false;
+  const IMG_FINAL = 'img/felicitacion-final.webp';
   function montaCarrusel() {
     const imgs = []; CARTA_BELEN.forEach((p) => { if (p.img && !imgs.find((x) => x.img === p.img)) imgs.push({ img: p.img, b: p.b }); });
+    imgs.push({ img: IMG_FINAL, b: ['50%', '62%'], final: true });
     const anillo = $('#car-anillo'), puntos = $('#car-puntos'); anillo.innerHTML = ''; puntos.innerHTML = '';
     tarjetas = imgs.map((x) => {
-      const t = document.createElement('div'); t.className = 'tarjeta'; t.style.setProperty('--bx', x.b[0]); t.style.setProperty('--by', x.b[1]);
+      const t = document.createElement('div'); t.className = 'tarjeta' + (x.final ? ' final' : ''); t.style.setProperty('--bx', x.b[0]); t.style.setProperty('--by', x.b[1]);
       t.innerHTML = `<img src="${x.img}" alt=""><div class="luz"></div><div class="brillo-paso"></div><div class="sombra"></div><div class="marco"></div>`;
       anillo.appendChild(t); puntos.appendChild(document.createElement('i')); t.dataset.img = x.img; return t;
     });
@@ -233,6 +235,8 @@
       await hablaFrase(p.v, ponFrase(p.t, p.cls));
       await espera(450);
     }
+    // felicitación final, después del último texto
+    irTarjeta(IMG_FINAL); ponFrase(''); await espera(2200);
     $('#car-firma').classList.add('ver'); await espera(900);
     $('#car-seguir').classList.add('ver');
   }
