@@ -182,7 +182,7 @@
   }
   // carrusel 3D de tarjetas flotantes
   let tarjetas = [], posCar = 0, posObjetivo = 0, carVivo = false;
-  const IMG_FINAL = 'img/felicitacion-final.webp';
+  const IMG_FINAL = 'img/felicitacion-final.webp?v=11';
   function montaCarrusel() {
     const imgs = []; CARTA_BELEN.forEach((p) => { if (p.img && !imgs.find((x) => x.img === p.img)) imgs.push({ img: p.img, b: p.b }); });
     imgs.push({ img: IMG_FINAL, b: ['50%', '62%'], final: true });
